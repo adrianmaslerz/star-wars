@@ -5,6 +5,9 @@ import { ThrottlerGuard, ThrottlerModule } from '@nestjs/throttler';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { getMongoConnectionLink } from './modules/core/utils/get-mongo-connection-link';
 import { MongooseModule } from '@nestjs/mongoose';
+import { CharacterModule } from './modules/character/character.module';
+import { EpisodesModule } from './modules/episode/episodes.module';
+import { PlanetModule } from './modules/planet/planet.module';
 
 @Module({
   imports: [
@@ -31,6 +34,9 @@ import { MongooseModule } from '@nestjs/mongoose';
         limit: 120,
       },
     ]),
+    CharacterModule,
+    EpisodesModule,
+    PlanetModule,
   ],
   controllers: [AppController],
   providers: [
