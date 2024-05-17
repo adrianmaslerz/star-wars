@@ -15,5 +15,6 @@ import { EpisodeRepositoryService } from './episode.repository.service';
     ]),
   ],
   providers: [EpisodeRepositoryService],
+  exports: [ EpisodeRepositoryService ]
 })
-export class EpisodesModule {}
+export class EpisodeModule {}

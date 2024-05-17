@@ -15,5 +15,6 @@ import { Planet, PlanetSchema } from './planet.schema';
     ]),
   ],
   providers: [PlanetRepositoryService],
+  exports: [PlanetRepositoryService],
 })
 export class PlanetModule {}

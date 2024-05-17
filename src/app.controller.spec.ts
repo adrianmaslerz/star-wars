@@ -16,6 +16,10 @@ describe('AppController', () => {
     controller = app.get<AppController>(AppController);
   });
 
+  it('should be defined', () => {
+    expect(controller).toBeDefined();
+  });
+
   describe('getApp', () => {
     it('should return app name', async () => {
       const getSpy = jest

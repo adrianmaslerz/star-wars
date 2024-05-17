@@ -3,6 +3,9 @@ import { CharacterController } from './character.controller';
 import { CharacterService } from './character.service';
 import { MongooseModule } from '@nestjs/mongoose';
 import { Character, CharacterSchema } from './character.schema';
+import { CharacterRepositoryService } from './character.repository.service';
+import { PlanetModule } from '../planet/planet.module';
+import { EpisodeModule } from '../episode/episode.module';
 
 @Module({
   imports: [
@@ -14,8 +17,10 @@ import { Character, CharacterSchema } from './character.schema';
         },
       },
     ]),
+    EpisodeModule,
+    PlanetModule,
   ],
   controllers: [CharacterController],
-  providers: [CharacterService],
+  providers: [CharacterService, CharacterRepositoryService],
 })
 export class CharacterModule {}

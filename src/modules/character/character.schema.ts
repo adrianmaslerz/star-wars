@@ -3,7 +3,7 @@ import { Document, Schema as MongooseSchema } from 'mongoose';
 import { required } from '../shared/constraints/required';
 import { maxLength } from '../shared/constraints/maxLength';
 import { Planet, PlanetDocument } from '../planet/planet.schema';
-import { EpisodeDocument } from '../episode/episode.schema';
+import { Episode, EpisodeDocument } from '../episode/episode.schema';
 import { minCollectionLength } from '../shared/validators/min-collection-length/min-collection-length';
 
 export type CharacterDocument = Character & Document;
@@ -18,7 +18,12 @@ export class Character {
   name: string;
 
   @Prop({
-    type: [MongooseSchema.Types.ObjectId],
+    type: [
+      {
+        type: MongooseSchema.Types.ObjectId,
+        ref: Episode.name,
+      },
+    ],
     validate: [minCollectionLength(1)],
   })
   episodes: EpisodeDocument[];
