@@ -1,22 +1,26 @@
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { CharacterRepositoryService } from './character.repository.service';
-import { CharacterDTO } from './character.dto';
-import { Character, CharacterDocument } from './character.schema';
-import { parseValidatorErrors } from '../shared/utils/parse-validator-errors';
-import { EpisodeRepositoryService } from '../episode/episode.repository.service';
-import { PlanetRepositoryService } from '../planet/planet.repository.service';
-import { parseStringError } from '../shared/utils/parse-string-error';
-import { SuccessOutputDTO } from '../shared/dto/success.output.dto';
+import { Character, CharacterDocument } from '../character.schema';
+import { parseValidatorErrors } from '../../shared/utils/parse-validator-errors';
+import { EpisodeRepositoryService } from '../../episode/episode.repository.service';
+import { PlanetRepositoryService } from '../../planet/planet.repository.service';
+import { parseStringError } from '../../shared/utils/parse-string-error';
+import { SuccessOutputDTO } from '../../shared/dto/success.output.dto';
+import { CharactersListParamsInputDto } from '../dto/characters-list-params.input.dto';
+import { PaginationOutputDTO } from '../../shared/dto/pagination.output.dto';
+import { CharacterDto } from '../dto/character.dto';
+import { CharacterQueryService } from './character.query.service';
 
 @Injectable()
 export class CharacterService {
   constructor(
     private characterRepositoryService: CharacterRepositoryService,
+    private characterQueryService: CharacterQueryService,
     private episodeRepositoryService: EpisodeRepositoryService,
     private planetRepositoryService: PlanetRepositoryService,
   ) {}
 
-  public async addCharacter(input: CharacterDTO): Promise<CharacterDTO> {
+  public async addCharacter(input: CharacterDto): Promise<CharacterDto> {
     return this.characterRepositoryService
       .create(await this.prepareObjectPayload(input))
       .then((result) => CharacterService.parse(result))
@@ -28,15 +32,30 @@ export class CharacterService {
       });
   }
 
-  public async getCharacter(id: string): Promise<CharacterDTO> {
+  public async getPaginatedCharacters(
+    input: CharactersListParamsInputDto,
+  ): Promise<PaginationOutputDTO<CharacterDto>> {
+    const paginated = await this.characterRepositoryService.paginate(
+      this.characterQueryService.getCharactersQuery(),
+      input,
+    );
+    return {
+      ...paginated,
+      results: paginated.results.map((element) =>
+        CharacterService.parse(element),
+      ),
+    };
+  }
+
+  public async getCharacter(id: string): Promise<CharacterDto> {
     const character = await this.getObjectHandle(id);
     return CharacterService.parse(character);
   }
 
   public async updateCharacter(
     id: string,
-    input: CharacterDTO,
-  ): Promise<CharacterDTO> {
+    input: CharacterDto,
+  ): Promise<CharacterDto> {
     const character = await this.getObjectHandle(id);
     return this.characterRepositoryService
       .update(character, await this.prepareObjectPayload(input))
@@ -67,7 +86,7 @@ export class CharacterService {
     return character;
   }
 
-  private async prepareObjectPayload(input: CharacterDTO): Promise<Character> {
+  private async prepareObjectPayload(input: CharacterDto): Promise<Character> {
     return {
       name: input.name,
       episodes: await this.episodeRepositoryService.findBy({
@@ -80,7 +99,7 @@ export class CharacterService {
     };
   }
 
-  public static parse(input: CharacterDocument): CharacterDTO {
+  public static parse(input: CharacterDocument): CharacterDto {
     return {
       _id: input._id,
       name: input.name,

@@ -1,7 +1,8 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { getModelToken } from '@nestjs/mongoose';
-import { Character } from './character.schema';
 import { CharacterRepositoryService } from './character.repository.service';
+import { Character } from '../character.schema';
+import * as paginator from '../../shared/utils/paginate';
 
 describe('CharactersService', () => {
   let service: CharacterRepositoryService;
@@ -80,6 +81,18 @@ describe('CharactersService', () => {
 
       expect(result).toBe('result');
       expect(model.deleteOne).toHaveBeenCalledWith({ _id: input });
+    });
+  });
+  describe('paginate', () => {
+    it('should call paginate function and return result', async () => {
+      const paginateSpy = jest
+        .spyOn(paginator, 'paginate')
+        .mockResolvedValueOnce('result' as any);
+
+      const result = await service.paginate('query' as any, 'params' as any);
+
+      expect(result).toBe('result');
+      expect(paginateSpy).toHaveBeenCalled();
     });
   });
 });

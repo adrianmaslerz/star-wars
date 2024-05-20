@@ -16,7 +16,6 @@ services:
         - .env
       depends_on:
         - db
-      command: npm run start:dev
 
     db:
       container_name: db

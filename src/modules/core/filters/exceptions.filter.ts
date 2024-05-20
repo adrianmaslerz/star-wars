@@ -15,6 +15,8 @@ export class ExceptionsFilter implements ExceptionFilter {
         ? parseStringError('Too many requests')
         : exception.data || exception.response;
 
+    console.log(exception)
+
     response.status(status).json({
       status: status,
       ...(data || parseStringError('Internal server error')),

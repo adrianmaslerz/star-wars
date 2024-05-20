@@ -1,20 +1,24 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { CharacterService } from './character.service';
 import { CharacterRepositoryService } from './character.repository.service';
-import { EpisodeRepositoryService } from '../episode/episode.repository.service';
-import { PlanetRepositoryService } from '../planet/planet.repository.service';
-import * as validatorErrorParser from '../shared/utils/parse-validator-errors';
-import * as stringErrorParser from '../shared/utils/parse-string-error';
+import { EpisodeRepositoryService } from '../../episode/episode.repository.service';
+import { PlanetRepositoryService } from '../../planet/planet.repository.service';
+import * as validatorErrorParser from '../../shared/utils/parse-validator-errors';
+import * as stringErrorParser from '../../shared/utils/parse-string-error';
 import { HttpException, HttpStatus } from '@nestjs/common';
-import { parseStringError } from '../shared/utils/parse-string-error';
+import { CharacterQueryService } from './character.query.service';
 
-describe('CharactersService', () => {
+describe('CharacterService', () => {
   let service: CharacterService;
   const characterRepositoryService = {
     create: jest.fn(),
     update: jest.fn(),
     delete: jest.fn(),
     findById: jest.fn(),
+    paginate: jest.fn(),
+  };
+  const characterQueryService = {
+    getCharactersQuery: jest.fn(),
   };
   const episodeRepositoryService = {
     findBy: jest.fn(),
@@ -32,6 +36,10 @@ describe('CharactersService', () => {
           useValue: characterRepositoryService,
         },
         {
+          provide: CharacterQueryService,
+          useValue: characterQueryService,
+        },
+        {
           provide: EpisodeRepositoryService,
           useValue: episodeRepositoryService,
         },
@@ -43,6 +51,9 @@ describe('CharactersService', () => {
     }).compile();
 
     service = module.get<CharacterService>(CharacterService);
+  });
+  afterEach(() => {
+    jest.clearAllMocks();
   });
 
   it('should be defined', () => {
@@ -117,6 +128,27 @@ describe('CharactersService', () => {
         'prepared',
       );
       expect(parseSpy).toHaveBeenCalledWith('result');
+    });
+  });
+  describe('getPaginatedCharacters', () => {
+    it('should prepare query for fetching object, paginate results and return parsed to proper DTO', async () => {
+      const parseSpy = jest
+        .spyOn(CharacterService, 'parse')
+        .mockReturnValue('parsed' as any);
+      characterQueryService.getCharactersQuery.mockReturnValueOnce('query');
+      characterRepositoryService.paginate.mockResolvedValueOnce({
+        results: [1, 2],
+      });
+
+      const result = await service.getPaginatedCharacters('input' as any);
+
+      expect(result).toEqual({ results: ['parsed', 'parsed'] });
+      expect(characterQueryService.getCharactersQuery).toHaveBeenCalled();
+      expect(characterRepositoryService.paginate).toHaveBeenCalledWith(
+        'query',
+        'input',
+      );
+      expect(parseSpy).toHaveBeenCalledTimes(2);
     });
   });
   describe('getCharacter', () => {

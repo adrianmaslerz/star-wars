@@ -1,12 +1,13 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { CharacterController } from './character.controller';
-import { CharacterService } from './character.service';
+import { CharacterService } from './services/character.service';
 
 describe('CharacterController', () => {
   let controller: CharacterController;
   const characterService = {
     addCharacter: jest.fn(),
     getCharacter: jest.fn(),
+    getPaginatedCharacters: jest.fn(),
     updateCharacter: jest.fn(),
     deleteCharacter: jest.fn(),
   };
@@ -37,6 +38,18 @@ describe('CharacterController', () => {
 
       expect(result).toBe('result');
       expect(characterService.addCharacter).toHaveBeenCalledWith('input');
+    });
+  });
+  describe('getCharacters', () => {
+    it('should call getPaginatedCharacters on character service and return response', async () => {
+      characterService.getPaginatedCharacters.mockResolvedValueOnce('result');
+
+      const result = await controller.getCharacters('input' as any);
+
+      expect(result).toBe('result');
+      expect(characterService.getPaginatedCharacters).toHaveBeenCalledWith(
+        'input',
+      );
     });
   });
   describe('getCharacter', () => {
